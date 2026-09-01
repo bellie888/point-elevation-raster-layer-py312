@@ -1,1 +1,50 @@
+version: 0.2
 
+phases:
+  install:
+    runtime-versions:
+      python: 3.12
+    commands:
+      - python --version
+      - python -m pip install --upgrade pip setuptools wheel
+
+  pre_build:
+    commands:
+      - rm -rf layer
+      - rm -f point-elevation-raster-py312-x86_64.zip
+      - mkdir -p layer/python
+
+  build:
+    commands:
+      - python -m pip install --no-cache-dir --only-binary=:all: --target layer/python -r requirements.txt
+
+      - echo "Installed top-level packages:"
+      - find layer/python -maxdepth 1 -mindepth 1 -printf "%f\n" | sort
+
+      - echo "Removing non-runtime files:"
+      - find layer/python -type d -name "__pycache__" -prune -exec rm -rf {} +
+      - find layer/python -type d -name "tests" -prune -exec rm -rf {} +
+      - find layer/python -type d -name "test" -prune -exec rm -rf {} +
+      - find layer/python -type f -name "*.pyc" -delete
+      - find layer/python -type f -name "*.pyo" -delete
+
+      - echo "Checking required package directories:"
+      - test -d layer/python/rasterio
+      - test -d layer/python/pyproj
+      - test -d layer/python/numpy
+
+      - echo "Uncompressed layer size:"
+      - du -sh layer/python
+
+      - echo "Creating Lambda Layer ZIP:"
+      - cd layer
+      - zip -r9 ../point-elevation-raster-py312-x86_64.zip python
+      - cd ..
+
+      - echo "Final Layer ZIP:"
+      - ls -lh point-elevation-raster-py312-x86_64.zip
+
+artifacts:
+  files:
+    - point-elevation-raster-py312-x86_64.zip
+  discard-paths: yes
