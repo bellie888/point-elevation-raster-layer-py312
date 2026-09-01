@@ -1,22 +1,43 @@
-build:
-  commands:
-    - python -m pip install --no-cache-dir --target layer/python rasterio pyproj
+version: 0.2
 
-    - find layer/python -maxdepth 1 -mindepth 1 -printf "%f\n" | sort
+phases:
+  install:
+    runtime-versions:
+      python: 3.12
+    commands:
+      - python --version
+      - python -m pip install --upgrade pip setuptools wheel
 
-    - find layer/python -type d -name "__pycache__" -prune -exec rm -rf {} +
-    - find layer/python -type d -name "tests" -prune -exec rm -rf {} +
-    - find layer/python -type d -name "test" -prune -exec rm -rf {} +
-    - find layer/python -type f -name "*.pyc" -delete
-    - find layer/python -type f -name "*.pyo" -delete
+  pre_build:
+    commands:
+      - rm -rf layer
+      - rm -f point-elevation-raster-py312-x86_64.zip
+      - mkdir -p layer/python
 
-    - test -d layer/python/rasterio
-    - test -d layer/python/pyproj
+  build:
+    commands:
+      - python -m pip install --no-cache-dir --target layer/python rasterio pyproj
 
-    - du -sh layer/python
+      - find layer/python -maxdepth 1 -mindepth 1 -printf "%f\n" | sort
 
-    - cd layer
-    - zip -r9 ../point-elevation-raster-py312-x86_64.zip python
-    - cd ..
+      - find layer/python -type d -name "__pycache__" -prune -exec rm -rf {} +
+      - find layer/python -type d -name "tests" -prune -exec rm -rf {} +
+      - find layer/python -type d -name "test" -prune -exec rm -rf {} +
+      - find layer/python -type f -name "*.pyc" -delete
+      - find layer/python -type f -name "*.pyo" -delete
 
-    - ls -lh point-elevation-raster-py312-x86_64.zip
+      - test -d layer/python/rasterio
+      - test -d layer/python/pyproj
+
+      - du -sh layer/python
+
+      - cd layer
+      - zip -r9 ../point-elevation-raster-py312-x86_64.zip python
+      - cd ..
+
+      - ls -lh point-elevation-raster-py312-x86_64.zip
+
+artifacts:
+  files:
+    - point-elevation-raster-py312-x86_64.zip
+  discard-paths: yes
