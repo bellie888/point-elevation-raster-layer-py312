@@ -1,6 +1,6 @@
 build:
   commands:
-    - 'python -m pip install --no-cache-dir --only-binary=:all: --target layer/python -r requirements.txt'
+    - python -m pip install --no-cache-dir --target layer/python rasterio pyproj
 
     - find layer/python -maxdepth 1 -mindepth 1 -printf "%f\n" | sort
 
