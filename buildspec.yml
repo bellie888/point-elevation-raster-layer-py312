@@ -7,18 +7,18 @@ phases:
     commands:
       - python --version
       - python -m pip install --upgrade pip setuptools wheel
+      - dnf install -y expat
 
   pre_build:
     commands:
       - rm -rf layer
       - rm -f point-elevation-raster-py312-x86_64.zip
       - mkdir -p layer/python
+      - mkdir -p layer/lib
 
   build:
     commands:
       - python -m pip install --no-cache-dir --target layer/python rasterio pyproj
-
-      - find layer/python -maxdepth 1 -mindepth 1 -printf "%f\n" | sort
 
       - find layer/python -type d -name "__pycache__" -prune -exec rm -rf {} +
       - find layer/python -type d -name "tests" -prune -exec rm -rf {} +
@@ -29,10 +29,15 @@ phases:
       - test -d layer/python/rasterio
       - test -d layer/python/pyproj
 
-      - du -sh layer/python
+      - find /usr/lib64 /lib64 -name "libexpat.so*"
+      - cp -L /usr/lib64/libexpat.so.1 layer/lib/libexpat.so.1
+
+      - test -f layer/lib/libexpat.so.1
+      - ls -lh layer/lib/libexpat.so.1
+      - du -sh layer
 
       - cd layer
-      - zip -r9 ../point-elevation-raster-py312-x86_64.zip python
+      - zip -r9 ../point-elevation-raster-py312-x86_64.zip python lib
       - cd ..
 
       - ls -lh point-elevation-raster-py312-x86_64.zip
