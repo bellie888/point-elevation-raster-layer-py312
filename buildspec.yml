@@ -18,7 +18,8 @@ phases:
 
   build:
     commands:
-      - python -m pip install --no-cache-dir --target layer/python rasterio pyproj
+      - python -m pip install --no-cache-dir --target layer/python -r requirements.txt
+      - grep "^Version:" layer/python/certifi-*.dist-info/METADATA
 
       - find layer/python -type d -name "__pycache__" -prune -exec rm -rf {} +
       - find layer/python -type d -name "tests" -prune -exec rm -rf {} +
